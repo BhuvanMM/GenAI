@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Description Generator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-color: #4f46e5;
+            --primary-light: #818cf8;
+            --primary-dark: #3730a3;
+            --accent-color: #10b981;
+            --text-dark: #1f2937;
+            --text-light: #4b5563;
+            --bg-light: #f9fafb;
+            --bg-white: #ffffff;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 0.5rem;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            color: var(--text-dark);
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            margin-bottom: 0.5rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+        
+        .header p {
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 10%, transparent 10.5%);
+            background-size: 20px 20px;
+            opacity: 0.3;
+            transform: rotate(30deg);
+        }
+
+        /* Main container */
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin: -3rem auto 2rem;
+            position: relative;
+            z-index: 10;
+        }
+        
+        @media (min-width: 768px) {
+            .container {
+                grid-template-columns: 1fr 1fr;
+                align-items: start;
+            }
+        }
+        
+        .form-container {
+            background-color: var(--bg-white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 2rem;
+            position: relative;
+            transform: translateY(0);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInLeft 0.6s ease-out;
+        }
+        
+        .form-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .form-container h2 {
+            margin-top: 0;
+            color: var(--primary-dark);
+            font-weight: 600;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-container h2 svg {
+            width: 24px;
+            height: 24px;
+            color: var(--primary-color);
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+            transition: transform 0.2s ease;
+        }
+        
+        .form-group:focus-within {
+            transform: translateX(5px);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            transition: color 0.2s ease;
+        }
+        
+        .form-group:focus-within label {
+            color: var(--primary-color);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            background-color: #fff;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        button {
+            cursor: pointer;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #generateBtn {
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -1px rgba(79, 70, 229, 0.1);
+        }
+        
+        #generateBtn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px -1px rgba(79, 70, 229, 0.3), 0 3px 6px -1px rgba(79, 70, 229, 0.2);
+        }
+        
+        #generateBtn:active {
+            transform: translateY(0);
+        }
+        
+        #generateBtn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: scale(0) translate(-50%, -50%);
+            transform-origin: top left;
+            opacity: 0;
+        }
+        
+        #generateBtn:active::after {
+            animation: ripple 0.6s ease-out;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0) translate(-50%, -50%);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20) translate(-50%, -50%);
+                opacity: 0;
+            }
+        }
+        
+        #copyBtn {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        #copyBtn:hover {
+            background-color: #f3f4f6;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        #copyBtn:active {
+            transform: translateY(0);
+        }
+        
+        .output-container {
+            background-color: var(--bg-white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 2rem;
+            animation: fadeInRight 0.6s ease-out;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .output-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .output-container h2 {
+            margin-top: 0;
+            color: var(--primary-dark);
+            font-weight: 600;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .description-box {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            padding: 1.5rem;
+            min-height: 200px;
+            margin-bottom: 1.5rem;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .description-box:hover {
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .loader {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(79, 70, 229, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .template-tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            background-color: var(--primary-light);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            margin-left: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .template-tag:hover {
+            background-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+        
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 1rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .success-message.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .category-icon {
+            color: var(--primary-color);
+            margin-right: 0.5rem;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            border-top: 1px solid #e5e7eb;
+            margin-top: 2rem;
+        }
+        
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Form field animations */
+        .input-focus-effect {
+            position: relative;
+        }
+        
+        .input-focus-effect::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease, left 0.3s ease;
+        }
+        
+        .input-focus-effect:focus-within::after {
+            width: 100%;
+            left: 0;
+        }
+        
+        /* Category card UI */
+        .category-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+        
+        .category-card {
+            flex: 1;
+            min-width: calc(20% - 0.5rem);
+            background-color: var(--bg-light);
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .category-card:hover {
+            background-color: var(--bg-white);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .category-card.active {
+            background-color: rgba(79, 70, 229, 0.1);
+            border-color: var(--primary-light);
+        }
+        
+        .category-card .icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .category-card .label {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        /* Quality indicator */
+        .quality-indicator {
+            height: 6px;
+            background-color: #e5e7eb;
+            border-radius: 3px;
+            margin-top: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .quality-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--primary-light), var(--accent-color));
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- New header section -->
+    <header class="header">
+        <div class="header-content">
+            <h1>Product Description Generator</h1>
+            <p>Create compelling product descriptions in seconds for your <br>e-commerce store, marketing campaigns, or catalogs.</p>
+        </div>
+    </header>
+    
+    <div class="page-container">
+        <div class="container">
+            <div class="form-container">
+                <h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                    </svg>
+                    Product Information
+                </h2>
+                <form id="productForm">
+                    <div class="form-group">
+                        <label for="category">Product Category</label>
+                        <div class="category-selector">
+                            <div class="category-card" data-value="clothing">
+                                <div class="icon">👕</div>
+                                <div class="label">Clothing</div>
+                            </div>
+                            <div class="category-card" data-value="electronics">
+                                <div class="icon">📱</div>
+                                <div class="label">Electronics</div>
+                            </div>
+                            <div class="category-card" data-value="homeGoods">
+                                <div class="icon">🏠</div>
+                                <div class="label">Home Goods</div>
+                            </div>
+                            <div class="category-card" data-value="beauty">
+                                <div class="icon">✨</div>
+                                <div class="label">Beauty</div>
+                            </div>
+                            <div class="category-card" data-value="food">
+                                <div class="icon">🍔</div>
+                                <div class="label">Food</div>
+                            </div>
+                        </div>
+                        <select id="category" name="category" required style="display: none;">
+                            <option value="">-- Select Category --</option>
+                            <option value="clothing">👕 Clothing</option>
+                            <option value="electronics">📱 Electronics</option>
+                            <option value="homeGoods">🏠 Home Goods</option>
+                            <option value="beauty">✨ Beauty & Personal Care</option>
+                            <option value="food">🍔 Food & Beverages</option>
+                        </select>
+                    </div>
+                    <div class="form-group input-focus-effect">
+                        <label for="product_name">Product Name</label>
+                        <input type="text" id="product_name" name="product_name" placeholder="Enter product name" required>
+                    </div>
+                    <div class="form-group input-focus-effect">
+                        <label for="materials">Materials/Ingredients</label>
+                        <input type="text" id="materials" name="materials" placeholder="e.g. cotton, steel, natural extracts">
+                    </div>
+                    <div class="form-group input-focus-effect">
+                        <label for="features">Key Features</label>
+                        <input type="text" id="features" name="features" placeholder="e.g. waterproof, lightweight, adjustable">
+                    </div>
+                    <div class="form-group input-focus-effect">
+                        <label for="benefits">Main Benefits</label>
+                        <input type="text" id="benefits" name="benefits" placeholder="e.g. saves time, improves comfort">
+                    </div>
+                    <div class="form-group input-focus-effect">
+                        <label for="target_audience">Target Audience</label>
+                        <input type="text" id="target_audience" name="target_audience" placeholder="e.g. women, athletes, professionals">
+                    </div>
+                    <div class="form-group input-focus-effect">
+                        <label for="additional_info">Additional Information</label>
+                        <textarea id="additional_info" name="additional_info" placeholder="Any other details you'd like to include..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="template">Description Template</label>
+                        <select id="template" name="template">
+                            <option value="default">Default Template</option>
+                            <option value="promotional">Promotional Template</option>
+                            <option value="technical">Technical Template</option>
+                            <option value="minimalist">Minimalist Template</option>
+                        </select>
+                    </div>
+                    
+                    <div class="quality-indicator">
+                        <div class="quality-bar" id="qualityBar"></div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" id="generateBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12c0 4.97-4.03 9-9 9-4.97 0-9-4.03-9-9 0-4.97 4.03-9 9-9 3.93 0 7.28 2.53 8.49 6.04"></path>
+                                <path d="M13.42 14.66c-.58-.59-.58-1.53 0-2.12a1.5 1.5 0 0 1 2.12 0c.58.59.58 1.53 0 2.12a1.5 1.5 0 0 1-2.12 0Z"></path>
+                                <path d="m15.73 12.73-5.73 5.73"></path>
+                                <path d="m10 18.46 2.5.5 1-2.03"></path>
+                                <path d="M21 6v6"></path>
+                                <path d="m21 7-2-2H9"></path>
+                            </svg>
+                            Generate Description
+                        </button>
+                        <div class="loader" id="loader"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="output-container" id="output">
+                <h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <path d="M14 2v6h6"></path>
+                        <path d="M16 13H8"></path>
+                        <path d="M16 17H8"></path>
+                        <path d="M10 9H8"></path>
+                    </svg>
+                    Generated Description
+                    <span class="template-tag" id="templateTag">Default</span>
+                </h2>
+                <div class="description-box" id="descriptionOutput">Your product description will appear here...</div>
+                <button id="copyBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                    </svg>
+                    Copy to Clipboard
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <p>© 2025 Product Description Generator - Create compelling product descriptions in seconds</p>
+    </footer>
+
+    <div class="success-message" id="successMessage">Copied to clipboard!</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generateBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const loader = document.getElementById('loader');
+            const descriptionOutput = document.getElementById('descriptionOutput');
+            const successMessage = document.getElementById('successMessage');
+            const templateTag = document.getElementById('templateTag');
+            const templateSelect = document.getElementById('template');
+            const qualityBar = document.getElementById('qualityBar');
+            const categorySelect = document.getElementById('category');
+            const categoryCards = document.querySelectorAll('.category-card');
+            const formInputs = document.querySelectorAll('input, textarea');
+            
+            // Update template tag when template selection changes
+            templateSelect.addEventListener('change', function() {
+                templateTag.textContent = this.options[this.selectedIndex].text;
+                templateTag.style.animation = 'fadeInUp 0.3s ease';
+                setTimeout(() => {
+                    templateTag.style.animation = '';
+                }, 300);
+            });
+            
+            // Category card selection
+            categoryCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Remove active class from all cards
+                    categoryCards.forEach(c => c.classList.remove('active'));
+                    // Add active class to clicked card
+                    this.classList.add('active');
+                    // Update hidden select
+                    categorySelect.value = this.dataset.value;
+                    
+                    // Animate the card
+                    this.style.animation = 'none';
+                    setTimeout(() => {
+                        this.style.animation = 'fadeInDown 0.3s';
+                    }, 10);
+                    
+                    updateQualityIndicator();
+                });
+            });
+            
+            // Update quality indicator based on form completion
+            function updateQualityIndicator() {
+                let filledFields = 0;
+                let totalFields = formInputs.length + 1; // +1 for category
+                
+                if (categorySelect.value) filledFields++;
+                
+                formInputs.forEach(input => {
+                    if (input.value.trim()) filledFields++;
+                });
+                
+                const percentage = (filledFields / totalFields) * 100;
+                qualityBar.style.width = `${percentage}%`;
+                
+                // Change color based on completion
+                if (percentage < 30) {
+                    qualityBar.style.background = 'linear-gradient(90deg, #f87171, #f87171)';
+                } else if (percentage < 70) {
+                    qualityBar.style.background = 'linear-gradient(90deg, #fbbf24, #fbbf24)';
+                } else {
+                    qualityBar.style.background = 'linear-gradient(90deg, #34d399, #10b981)';
+                }
+            }
+            
+            // Update quality indicator on input change
+            formInputs.forEach(input => {
+                input.addEventListener('input', updateQualityIndicator);
+                
+                // Add focus animations
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('focused');
+                });
+            });
+            
+            generateBtn.addEventListener('click', function() {
+                // Button click effect
+                this.classList.add('button-clicked');
+                setTimeout(() => {
+                    this.classList.remove('button-clicked');
+                }, 300);
+                
+                // Show loader
+                loader.style.display = 'block';
+                generateBtn.disabled = true;
+                
+                // Get form data
+                const formData = new FormData(document.getElementById('productForm'));
+                const data = {};
+                for (let [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+                
+                // Simulate API call with timeout
+                setTimeout(function() {
+                    // Hide loader
+                    loader.style.display = 'none';
+                    generateBtn.disabled = false;
+                    
+                    // Generate dummy description (in a real app, this would be from the API)
+                    let description = generateDummyDescription(data);
+                    
+                    // Apply animation to output
+                    descriptionOutput.style.opacity = 0;
+                    setTimeout(() => {
+                        // Display the description
+                        descriptionOutput.textContent = description;
+                        
+                        // Fade in the result
+                        descriptionOutput.style.opacity = 1;
+                        descriptionOutput.style.transition = 'opacity 0.5s ease';
+                    }, 200);
+                    
+                    // Scroll to output on mobile
+                    if (window.innerWidth < 768) {
+                        document.getElementById('output').scrollIntoView({ behavior: 'smooth' });
+                    }
+                }, 1500);
+            });
+            
+            copyBtn.addEventListener('click', function() {
+                // Button press animation
+                this.classList.add('button-clicked');
+                setTimeout(() => {
+                    this.classList.remove('button-clicked');
+                }, 300);
+                
+                // Copy text to clipboard
+                const text = descriptionOutput.textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    // Show success message
+                    successMessage.classList.add('show');
+                    setTimeout(() => {
+                        successMessage.classList.remove('show');
+                    }, 2000);
+                });
+            });
+            
+            // Initialize quality indicator
+            updateQualityIndicator();
+            
+            // Function to generate dummy description (replace with actual API in production)
+            function generateDummyDescription(data) {
+                const { category, product_name, materials, features, benefits, target_audience, template } = data;
+                
+                // Templates
+                const templates = {
+                    default: `Introducing the ${product_name} - the perfect addition to our ${category} collection. Made with premium ${materials || 'materials'}, this product features ${features || 'exceptional quality and design'}. Experience the benefits of ${benefits || 'superior craftsmanship'}, designed specifically for ${target_audience || 'everyone'}.`,
+                    
+                    promotional: `🔥 LIMITED TIME OFFER! 🔥\nGrab your ${product_name} today and transform your ${category} experience! Crafted from top-quality ${materials || 'materials'}, this must-have product delivers ${benefits || 'amazing results'}. Perfect for ${target_audience || 'you'} - don't miss out!`,
+                    
+                    technical: `${product_name}\nProduct Category: ${category}\nMaterials: ${materials || 'Standard'}\nKey Features: ${features || 'N/A'}\nTarget Market: ${target_audience || 'General'}\n\nTechnical Specifications:\nThis product is engineered to provide ${benefits || 'optimal performance'} through innovative design and quality construction.`,
+                    
+                    minimalist: `${product_name}. ${category}. ${features || 'Simple. Effective. Essential.'}`
+                };
+                
+                return templates[template] || templates.default;
+            }
+        });
+    </script>
+</body>
+</html>
